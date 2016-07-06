@@ -1,0 +1,41 @@
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "ap-southeast-2",
+    "vpc_id": "vpc-ac5bf9c9",
+    "subnet_id": "subnet-6067e405",
+    "source_ami": "ami-4c6d422f",
+    "instance_type": "t2.medium",
+    "ami_name": "packer-ami-template-{{timestamp}}",
+    "ssh_keypair_name": "{{user `aws_keypair`}}",
+    "ssh_private_key_file": "{{user `aws_keyfile`}}",
+    "communicator": "winrm",
+    "winrm_username": "Administrator",
+    "associate_public_ip_address":true,
+    "user_data_file": "./win-scripts/win-configure-winrm-with-rdp-certificate.txt",
+    "winrm_insecure": true,
+    "winrm_use_ssl": true,
+    "ami_block_device_mappings": [ {
+      "device_name": "/dev/sda1",
+      "volume_size": 60,
+      "delete_on_termination": true,
+      "volume_type": "gp2"
+    } ],
+    "launch_block_device_mappings": [ {
+      "device_name": "/dev/sda1",
+      "volume_size": 60,
+      "delete_on_termination": true,
+      "volume_type": "gp2"
+    } ]
+  }],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "scripts": ["./win-scripts/enable-rdp.bat",
+                  "./win-scripts/set-region.ps1",
+                  "./win-scripts/ec2-reset-admin-password.ps1"]
+    }
+  ]
+}
